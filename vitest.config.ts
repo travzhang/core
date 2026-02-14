@@ -30,7 +30,7 @@ export default defineConfig({
     },
     coverage: {
       provider: 'v8',
-      reporter: ['text', '@canyonjs/report'],
+      reporter: ['json'],
       include: ['packages/*/src/**'],
       exclude: [
         // entries that are not really used during tests
