@@ -62,7 +62,7 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
-    "@canyonjs/reporter":"latest",
+    "@canyonjs/report":"latest",
     "@babel/parser": "catalog:",
     "@babel/types": "catalog:",
     "@rollup/plugin-alias": "^6.0.0",
