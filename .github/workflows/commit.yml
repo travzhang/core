@@ -1,0 +1,30 @@
+name: 手动触发CI（指定Commit+修改配置）
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: '要运行CI的Commit SHA（完整/前7位均可）'
+        required: true
+        type: string
+        default: ''
+      # 可选：新增参数，让你手动指定配置值（更灵活）
+      env_value:
+        description: '要替换的环境值（如数据库地址）'
+        required: false
+        type: string
+        default: 'prod'
+
+jobs:
+  run-ci:
+    runs-on: ubuntu-latest
+    steps:
+      # 步骤1：checkout指定commit的代码
+      - name: Checkout 指定Commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commit_sha }}
+          fetch-depth: 0
+
+      - name: 运行CI逻辑
+        run: ls
