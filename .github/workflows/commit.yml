@@ -8,23 +8,57 @@ on:
         required: true
         type: string
         default: ''
-      # 可选：新增参数，让你手动指定配置值（更灵活）
-      env_value:
-        description: '要替换的环境值（如数据库地址）'
-        required: false
-        type: string
-        default: 'prod'
 
 jobs:
   run-ci:
     runs-on: ubuntu-latest
     steps:
-      # 步骤1：checkout指定commit的代码
-      - name: Checkout 指定Commit
-        uses: actions/checkout@v4
+      # 步骤2：将最新的vitest.config.ts复制到临时目录（关键：保存最新配置）
+      - name: 保存最新vitest.config.ts
+        run: |
+          # 创建临时目录（避免被后续checkout覆盖）
+          mkdir -p /tmp/vitest-config
+          # 复制最新配置文件到临时目录
+          cp vitest.config.ts /tmp/vitest-config/
+          # 验证：打印临时目录的配置文件内容（可选，方便排查）
+          echo "最新vitest.config.ts内容："
+          cat /tmp/vitest-config/vitest.config.ts
+
+      # 步骤3：checkout到指定的目标commit（历史版本）
+      - name: Checkout 指定Commit（历史代码）
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.commit_sha }}
           fetch-depth: 0
+          clean: true  # 清空工作区，确保是纯历史版本代码
 
-      - name: 运行CI逻辑
-        run: ls
+      # 步骤4：将临时目录的最新配置文件覆盖到当前工作区
+      - name: 恢复最新vitest.config.ts
+        run: |
+          # 覆盖历史版本的配置文件（如果历史版本没有该文件，会直接创建）
+          cp /tmp/vitest-config/vitest.config.ts ./
+          # 验证：打印当前工作区的配置文件，确认是最新版本
+          echo "当前工作区的vitest.config.ts内容："
+          cat vitest.config.ts
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.2.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'pnpm'
+
+      - run: pnpm install --no-frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm run test-coverage
+
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-coverage-report
+          path: coverage
+          retention-days: 30
+          if-no-files-found: error
