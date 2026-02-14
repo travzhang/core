@@ -15,7 +15,7 @@ jobs:
     steps:
       # 步骤1：先checkout到HEAD（默认是当前分支最新提交），获取最新的vitest.config.ts
       - name: Checkout HEAD（最新代码）
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}  # 固定取当前分支的HEAD（如main/dev）
           fetch-depth: 0  # 拉取完整历史，避免后续checkout失败
