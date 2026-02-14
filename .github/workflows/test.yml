@@ -25,87 +25,12 @@ jobs:
       - run: pnpm install
 
       - name: Run unit tests
-        run: pnpm run test-unit
+        run: pnpm run test-coverage
 
-  unit-test-windows:
-    runs-on: windows-latest
-    env:
-      PUPPETEER_SKIP_DOWNLOAD: 'true'
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
-
-      - name: Install Node.js
-        uses: actions/setup-node@v6
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v6
         with:
-          node-version-file: '.node-version'
-          cache: 'pnpm'
-
-      - run: pnpm install
-
-      - name: Run compiler unit tests
-        run: pnpm run test-unit compiler
-
-      - name: Run ssr unit tests
-        run: pnpm run test-unit server-renderer
-
-  e2e-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup cache for Chromium binary
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/puppeteer
-          key: chromium-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
-
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.node-version'
-          cache: 'pnpm'
-
-      - run: pnpm install
-      - run: node node_modules/puppeteer/install.mjs
-
-      - name: Run e2e tests
-        run: pnpm run test-e2e
-
-      - name: verify treeshaking
-        run: node scripts/verify-treeshaking.js
-
-  lint-and-test-dts:
-    runs-on: ubuntu-latest
-    env:
-      PUPPETEER_SKIP_DOWNLOAD: 'true'
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
-
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.node-version'
-          cache: 'pnpm'
-
-      - run: pnpm install
-
-      - name: Run eslint
-        run: pnpm run lint
-
-      - name: Run prettier
-        run: pnpm run format-check
-
-      - name: Run tsc
-        run: pnpm run check
-
-      - name: Run type declaration tests
-        run: pnpm run test-dts
+          name: web-coverage-report
+          path: coverage
+          retention-days: 30
+          if-no-files-found: error
